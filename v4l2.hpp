@@ -65,14 +65,16 @@ private:
     buffer *buffers;
     unsigned int n_buffers;
     int out_buf;
-    int force_format;
+    int force_format = 1;
+    int width = 640;
+    int height = 400;
     int frame_count = 100;
 };
 
-cv4l2 *open(const char *dev_name);
-void close(cv4l2 *handle);
-void start(cv4l2 *handle);
-void stop(cv4l2 *handle);
-struct buffer read(cv4l2 *handle);
+void *open(const char *dev_name);
+void close(void *handle);
+void start(void *handle);
+void stop(void *handle);
+struct buffer read(void *handle);
 
 int add(int, int);

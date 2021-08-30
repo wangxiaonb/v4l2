@@ -7,7 +7,7 @@
 * see https://linuxtv.org/docs.php for more information
 */
 
-#include "v4l2.h"
+#include "v4l2.hpp"
 
 /***************************************************************************/
 cv4l2 ::cv4l2(const char *dev)
@@ -17,8 +17,6 @@ cv4l2 ::cv4l2(const char *dev)
 
 cv4l2::~cv4l2()
 {
-    uninit_device();
-    close_device();
 }
 
 void cv4l2::errno_exit(const char *s)
@@ -508,9 +506,12 @@ void cv4l2::init_device(void)
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (force_format)
     {
-        fmt.fmt.pix.width = 640;
-        fmt.fmt.pix.height = 480;
-        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+        // fmt.fmt.pix.width = 640;
+        // fmt.fmt.pix.height = 480;
+        // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+        fmt.fmt.pix.width = width;
+        fmt.fmt.pix.height = height;
+        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
         fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
         if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
@@ -731,74 +732,82 @@ struct buffer cv4l2::read_frame()
 
 /***************************************************************************/
 
-cv4l2 *open(const char *dev_name)
+void *open(const char *dev_name)
 {
-    cv4l2 *handle = new cv4l2(dev_name);
-    handle->open_device();
-    handle->init_device();
+    void *handle;
+    handle = (void *)new cv4l2(dev_name);
+    printf("open: %lu\n", (unsigned long)handle);
+    ((cv4l2 *)handle)->open_device();
+    ((cv4l2 *)handle)->init_device();
     return handle;
 }
 
-void close(cv4l2 *handle)
+void close(void *handle)
 {
-    delete handle;
+    printf("close: %lu\n", (unsigned long)handle);
+    ((cv4l2 *)handle)->uninit_device();
+    ((cv4l2 *)handle)->close_device();
+    delete ((cv4l2 *)handle);
 }
 
-void start(cv4l2 *handle)
+void start(void *handle)
 {
-    handle->start_capturing();
+    printf("start: %lu\n", (unsigned long)handle);
+    ((cv4l2 *)handle)->start_capturing();
 }
 
-void stop(cv4l2 *handle)
+void stop(void *handle)
 {
-    handle->stop_capturing();
+    printf("stop: %lu\n", (unsigned long)handle);
+    ((cv4l2 *)handle)->stop_capturing();
 }
 
-struct buffer read(cv4l2 *handle)
+struct buffer read(void *handle)
 {
-    return handle->read_frame();
+    // printf("read: %lu\n",(unsigned long)handle);
+    return ((cv4l2 *)handle)->read_frame();
 }
 
-int main(int argc, char **argv)
-{
-    struct buffer frame;
+// int main2(int argc, char **argv)
+// {
+//     struct buffer frame;
 
-    cv4l2 *handle = open("/dev/video0");
-    start(handle);
+//     void *handle = open("/dev/video0");
+//     start(handle);
 
-    for (int i = 0; i < 200; i++)
-    {
-        frame = read(handle);
+//     for (int i = 0; i < 200; i++)
+//     {
+//         frame = read(handle);
 
-        // printf("\ndata\n");
-        // for (int i = 0; i < 640 * 4; i++)
-        // {
-        //     printf("%02x ", ((u_char*)frame.start)[i]);
-        // }
+//         // printf("\ndata\n");
+//         // for (int i = 0; i < 640 * 4; i++)
+//         // {
+//         //     printf("%02x ", ((u_char*)frame.start)[i]);
+//         // }
 
-        fflush(stderr);
-        fprintf(stderr, ".");
-        fflush(stdout);
-    }
+//         fflush(stderr);
+//         fprintf(stderr, ".");
+//         fflush(stdout);
+//     }
 
-    stop(handle);
-    close(handle);
+//     stop(handle);
+//     close(handle);
 
-    // cv4l2 *v4l2_0 = new cv4l2("/dev/video0");
-    // v4l2_0->open_device();
-    // v4l2_0->init_device();
-    // v4l2_0->start_capturing();
-    // v4l2_0->mainloop();
-    // v4l2_0->stop_capturing();
-    // v4l2_0->uninit_device();
-    // v4l2_0->close_device();
+//     // cv4l2 *v4l2_0 = new cv4l2("/dev/video0");
+//     // v4l2_0->open_device();
+//     // v4l2_0->init_device();
+//     // v4l2_0->start_capturing();
+//     // v4l2_0->mainloop();
+//     // v4l2_0->stop_capturing();
+//     // v4l2_0->uninit_device();
+//     // v4l2_0->close_device();
 
-    fprintf(stderr, "\n");
+//     fprintf(stderr, "\n");
 
-    return 0;
-}
+//     return 0;
+// }
 
 int add(int a, int b)
 {
-    return a + b;
+    return a + b + 1;
 }

@@ -11,7 +11,8 @@
         "utility": "c",
         "stdio.h": "c",
         "python.h": "c",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "random": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
