@@ -9,11 +9,16 @@
 
 #include "v4l2.h"
 
-
 /***************************************************************************/
-cv4l2 ::cv4l2(const char* dev)
+cv4l2 ::cv4l2(const char *dev)
 {
-    strcpy(dev_name,dev);
+    strcpy(dev_name, dev);
+}
+
+cv4l2::~cv4l2()
+{
+    uninit_device();
+    close_device();
 }
 
 void cv4l2::errno_exit(const char *s)
@@ -50,7 +55,7 @@ void cv4l2::process_image(const void *p, int size)
     fflush(stdout);
 }
 
-int cv4l2::read_frame(void)
+int cv4l2::read_frame_origin(void)
 {
     struct v4l2_buffer buf;
     unsigned int i;
@@ -184,7 +189,7 @@ void cv4l2::mainloop(void)
                 exit(EXIT_FAILURE);
             }
 
-            if (read_frame())
+            if (read_frame_origin())
                 break;
             /* EAGAIN - continue select loop. */
         }
@@ -579,55 +584,221 @@ void cv4l2::open_device(void)
     }
 }
 
-/***************************************************************************/
-extern "C" int add(int a, int b)
+struct buffer cv4l2::read_frame_real()
 {
-    return a + b;
+    struct buffer frame = {NULL, 0};
+
+    struct v4l2_buffer buf;
+    unsigned int i;
+
+    switch (io)
+    {
+    case IO_METHOD_READ:
+        if (-1 == read(fd, buffers[0].start, buffers[0].length))
+        {
+            switch (errno)
+            {
+            case EAGAIN:
+                return frame;
+                // return 0;
+
+            case EIO:
+                /* Could ignore EIO, see spec. */
+
+                /* fall through */
+
+            default:
+                errno_exit("read");
+            }
+        }
+
+        frame = {buffers[0].start, buffers[0].length};
+        // process_image(buffers[0].start, buffers[0].length);
+        break;
+
+    case IO_METHOD_MMAP:
+        CLEAR(buf);
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_MMAP;
+
+        if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf))
+        {
+            switch (errno)
+            {
+            case EAGAIN:
+                return frame;
+                // return 0;
+
+            case EIO:
+                /* Could ignore EIO, see spec. */
+
+                /* fall through */
+
+            default:
+                errno_exit("VIDIOC_DQBUF");
+            }
+        }
+
+        assert(buf.index < n_buffers);
+
+        // process_image(buffers[buf.index].start, buf.bytesused);
+        frame = {buffers[buf.index].start, buf.bytesused};
+
+        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
+            errno_exit("VIDIOC_QBUF");
+        break;
+
+    case IO_METHOD_USERPTR:
+        CLEAR(buf);
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_USERPTR;
+
+        if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf))
+        {
+            switch (errno)
+            {
+            case EAGAIN:
+                return frame;
+                // return 0;
+
+            case EIO:
+                /* Could ignore EIO, see spec. */
+
+                /* fall through */
+
+            default:
+                errno_exit("VIDIOC_DQBUF");
+            }
+        }
+
+        for (i = 0; i < n_buffers; ++i)
+            if (buf.m.userptr == (unsigned long)buffers[i].start && buf.length == buffers[i].length)
+                break;
+
+        assert(i < n_buffers);
+
+        frame = {(void *)buf.m.userptr, buf.bytesused};
+        // process_image((void *)buf.m.userptr, buf.bytesused);
+
+        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
+            errno_exit("VIDIOC_QBUF");
+        break;
+    }
+
+    return frame;
 }
 
-extern "C" int open_camera(const char *dev_name)
+struct buffer cv4l2::read_frame()
 {
-    struct stat st;
-
-    if (-1 == stat(dev_name, &st))
+    struct buffer frame;
+    for (;;)
     {
-        fprintf(stderr, "Cannot identify '%s': %d, %s\\n",
-                dev_name, errno, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+        fd_set fds;
+        struct timeval tv;
+        int r;
 
-    if (!S_ISCHR(st.st_mode))
-    {
-        fprintf(stderr, "%s is no device\n", dev_name);
-        exit(EXIT_FAILURE);
-    }
+        FD_ZERO(&fds);
+        FD_SET(fd, &fds);
 
-    int fd = open(dev_name, O_RDWR /* required */ | O_NONBLOCK, 0);
-    if (-1 == fd)
-    {
-        fprintf(stderr, "Cannot open '%s': %d, %s\\n",
-                dev_name, errno, strerror(errno));
-        exit(EXIT_FAILURE);
+        /* Timeout. */
+        tv.tv_sec = 2;
+        tv.tv_usec = 0;
+
+        r = select(fd + 1, &fds, NULL, NULL, &tv);
+
+        if (-1 == r)
+        {
+            if (EINTR == errno)
+                continue;
+            errno_exit("select");
+        }
+
+        if (0 == r)
+        {
+            fprintf(stderr, "select timeout\\n");
+            exit(EXIT_FAILURE);
+        }
+
+        frame = read_frame_real();
+        if (frame.length > 0)
+            return frame;
+        /* EAGAIN - continue select loop. */
     }
-    fprintf(stdout, "fd: %d\n", fd);
-    return fd;
+    return {NULL, 0};
+}
+
+/***************************************************************************/
+
+cv4l2 *open(const char *dev_name)
+{
+    cv4l2 *handle = new cv4l2(dev_name);
+    handle->open_device();
+    handle->init_device();
+    return handle;
+}
+
+void close(cv4l2 *handle)
+{
+    delete handle;
+}
+
+void start(cv4l2 *handle)
+{
+    handle->start_capturing();
+}
+
+void stop(cv4l2 *handle)
+{
+    handle->stop_capturing();
+}
+
+struct buffer read(cv4l2 *handle)
+{
+    return handle->read_frame();
 }
 
 int main(int argc, char **argv)
 {
-    cv4l2 *v4l2_0 = new cv4l2("/dev/video0");
+    struct buffer frame;
 
-    v4l2_0->open_device();
-    v4l2_0->init_device();
-    v4l2_0->start_capturing();
-    v4l2_0->mainloop();
-    v4l2_0->stop_capturing();
-    v4l2_0->uninit_device();
-    v4l2_0->close_device();
+    cv4l2 *handle = open("/dev/video0");
+    start(handle);
+
+    for (int i = 0; i < 200; i++)
+    {
+        frame = read(handle);
+
+        // printf("\ndata\n");
+        // for (int i = 0; i < 640 * 4; i++)
+        // {
+        //     printf("%02x ", ((u_char*)frame.start)[i]);
+        // }
+
+        fflush(stderr);
+        fprintf(stderr, ".");
+        fflush(stdout);
+    }
+
+    stop(handle);
+    close(handle);
+
+    // cv4l2 *v4l2_0 = new cv4l2("/dev/video0");
+    // v4l2_0->open_device();
+    // v4l2_0->init_device();
+    // v4l2_0->start_capturing();
+    // v4l2_0->mainloop();
+    // v4l2_0->stop_capturing();
+    // v4l2_0->uninit_device();
+    // v4l2_0->close_device();
 
     fprintf(stderr, "\n");
 
     return 0;
 }
 
-
+int add(int a, int b)
+{
+    return a + b;
+}

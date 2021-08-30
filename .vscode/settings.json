@@ -10,7 +10,8 @@
         "type_traits": "c",
         "utility": "c",
         "stdio.h": "c",
-        "python.h": "c"
+        "python.h": "c",
+        "*.tcc": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
