@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "unistd.h": "c",
+        "videodev2.h": "c",
+        "array": "c",
+        "functional": "c",
+        "istream": "c",
+        "ostream": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "stdio.h": "c",
+        "python.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}
