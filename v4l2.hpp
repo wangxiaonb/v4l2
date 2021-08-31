@@ -28,17 +28,18 @@ class cv4l2
 {
 public:
     cv4l2(const char *dev);
+    cv4l2(const char *dev,int width, int height, const char *color);
     ~cv4l2();
 
     void open_device(void);
     void init_device(void);
-    void mainloop(void);
-    void stop_capturing(void);
     void start_capturing(void);
-    void close_device(void);
-    void uninit_device(void);
-
     struct buffer read_frame();
+    void stop_capturing(void);
+    void uninit_device(void);
+    void close_device(void);
+    
+    void set_format(int width, int height, const char* color);
 
 private:
     void errno_exit(const char *s);
@@ -46,9 +47,6 @@ private:
     void init_read(unsigned int buffer_size);
     void init_mmap(void);
     void init_userp(unsigned int buffer_size);
-    void process_image(const void *p, int size);
-    int read_frame_origin(void);
-
     struct buffer read_frame_real();
 
 private:
@@ -66,15 +64,17 @@ private:
     unsigned int n_buffers;
     int out_buf;
     int force_format = 1;
-    int width = 640;
-    int height = 400;
+    int width = 1280;
+    int height = 800;
+    __u32 color = 0x59455247;
     int frame_count = 100;
 };
 
 void *open(const char *dev_name);
+void *open(const char *dev_name,int width, int height, const char *color);
 void close(void *handle);
 void start(void *handle);
 void stop(void *handle);
 struct buffer read(void *handle);
 
-int add(int, int);
+void setformat(void *handle, int width, int height, const char* color);

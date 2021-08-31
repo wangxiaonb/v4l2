@@ -1,34 +1,34 @@
-#include "v4l2.hpp"
+// #include "v4l2.hpp"
 
-int main(int argc, char **argv)
-{
-    struct buffer frame;
+// int main(int argc, char **argv)
+// {
+//     struct buffer frame;
 
-    void *handle = open("/dev/video0");
-    // unsigned long result = (unsigned long)handle;
-    // printf("c++____handle: open %lu\n",result);
+//     void *handle = open("/dev/video0");
+//     // unsigned long result = (unsigned long)handle;
+//     // printf("c++____handle: open %lu\n",result);
 
-    start(handle);
+//     start(handle);
 
-    for (int i = 0; i < 100; i++)
-    {
-        frame = read(handle);
+//     for (int i = 0; i < 100; i++)
+//     {
+//         frame = read(handle);
 
-        // printf("\ndata\n");
-        // for (int i = 0; i < 640 * 4; i++)
-        // {
-        //     printf("%02x ", ((u_char*)frame.start)[i]);
-        // }
+//         // printf("\ndata\n");
+//         // for (int i = 0; i < 640 * 4; i++)
+//         // {
+//         //     printf("%02x ", ((u_char*)frame.start)[i]);
+//         // }
 
-        fflush(stderr);
-        fprintf(stderr, ".");
-        fflush(stdout);
-    }
+//         fflush(stderr);
+//         fprintf(stderr, ".");
+//         fflush(stdout);
+//     }
 
-    stop(handle);
-    close(handle);
+//     stop(handle);
+//     close(handle);
 
-    fprintf(stderr, "\n");
+//     fprintf(stderr, "\n");
 
-    return 0;
-}
+//     return 0;
+// }
