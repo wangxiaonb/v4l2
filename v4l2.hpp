@@ -28,7 +28,7 @@ class cv4l2
 {
 public:
     cv4l2(const char *dev);
-    cv4l2(const char *dev,int width, int height, const char *color);
+    cv4l2(const char *dev, int width, int height, const char *color);
     ~cv4l2();
 
     void open_device(void);
@@ -38,8 +38,10 @@ public:
     void stop_capturing(void);
     void uninit_device(void);
     void close_device(void);
-    
-    void set_format(int width, int height, const char* color);
+
+    void set_format(int width, int height, const char *color);
+    void set_control(__u32 id, __s32 value);
+    __s32 get_control(__u32 id);
 
 private:
     void errno_exit(const char *s);
@@ -71,10 +73,12 @@ private:
 };
 
 void *open(const char *dev_name);
-void *open(const char *dev_name,int width, int height, const char *color);
+void *open(const char *dev_name, int width, int height, const char *color);
 void close(void *handle);
 void start(void *handle);
 void stop(void *handle);
 struct buffer read(void *handle);
 
-void setformat(void *handle, int width, int height, const char* color);
+void setformat(void *handle, int width, int height, const char *color);
+void setcontrol(void *handle, __u32 id, __s32 value);
+__s32 getcontrol(void *handle, __u32 id);

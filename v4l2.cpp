@@ -469,7 +469,7 @@ struct buffer cv4l2::read_frame()
 
         if (0 == r)
         {
-            fprintf(stderr, "select timeout\\n");
+            fprintf(stderr, "select timeout\n");
             exit(EXIT_FAILURE);
         }
 
@@ -586,21 +586,6 @@ void cv4l2::close_device(void)
 
 void cv4l2::set_format(int width, int height, const char *color)
 {
-    // struct v4l2_format fmt;
-    // CLEAR(fmt);
-
-    // this->width = width;
-    // this->height = height;
-
-    // fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    // fmt.fmt.pix.width = width;
-    // fmt.fmt.pix.height = height;
-    // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;//v4l2_fourcc(color[0], color[1], color[2], color[3]);
-    // fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
-
-    // if (-1 == xioctl(fd, VIDIOC_TRY_FMT, &fmt))
-    //     errno_exit("VIDIOC_TRY_FMT");
-
     this->width = width;
     this->height = height;
     this->color = v4l2_fourcc(color[0], color[1], color[2], color[3]);
@@ -612,15 +597,50 @@ void cv4l2::set_format(int width, int height, const char *color)
     init_device();
 }
 
+void cv4l2::set_control(__u32 id, __s32 value)
+{
+    int value_old;
+    struct v4l2_control ctrl;
+    ctrl.id = id;
+    if (-1 == ioctl(fd, VIDIOC_G_CTRL, &ctrl))
+    {
+        errno_exit("VIDIOC_G_CTRL");
+    }
+    value_old = ctrl.value;
+    ctrl.value = value;
+    if (-1 == ioctl(fd, VIDIOC_S_CTRL, &ctrl))
+    {
+        errno_exit("VIDIOC_S_CTRL");
+    }
+    if (-1 == ioctl(fd, VIDIOC_G_CTRL, &ctrl))
+    {
+        errno_exit("VIDIOC_G_CTRL");
+    }
+    printf("\nSet Control id: %04x, from %d to %d\n", ctrl.id, value_old, ctrl.value);
+}
+
+__s32 cv4l2::get_control(__u32 id)
+{
+    struct v4l2_control ctrl;
+    ctrl.id = id;
+    if (-1 == ioctl(fd, VIDIOC_G_CTRL, &ctrl))
+    {
+        errno_exit("VIDIOC_G_CTRL");
+    }
+    printf("\nGet Control id: %04x, value: %d\n", ctrl.id, ctrl.value);
+    return ctrl.value;
+}
+
 /*********************************Extern*****************************************/
 
 void *open(const char *dev_name)
 {
-    void *handle;
-    handle = (void *)new cv4l2(dev_name);
-    ((cv4l2 *)handle)->open_device();
-    ((cv4l2 *)handle)->init_device();
-    return handle;
+    // void *handle;
+    // handle = (void *)new cv4l2(dev_name);
+    // ((cv4l2 *)handle)->open_device();
+    // ((cv4l2 *)handle)->init_device();
+    // return handle;
+    return open(dev_name, 640, 400, "GREY");
 }
 
 void *open(const char *dev_name, int width, int height, const char *color)
@@ -629,6 +649,11 @@ void *open(const char *dev_name, int width, int height, const char *color)
     handle = (void *)new cv4l2(dev_name, width, height, color);
     ((cv4l2 *)handle)->open_device();
     ((cv4l2 *)handle)->init_device();
+    // ((cv4l2 *)handle)->set_control(V4L2_CID_EXPOSURE_AUTO,V4L2_EXPOSURE_AUTO);
+    // ((cv4l2 *)handle)->set_control(V4L2_CID_EXPOSURE,800);
+    // ((cv4l2 *)handle)->set_control(V4L2_CID_HBLANK, 816);//V4L2_CID_HBLANK: 816
+    // ((cv4l2 *)handle)->set_control(V4L2_CID_VBLANK, 800); //V4L2_CID_VBLANK: 21
+    // int value = ((cv4l2 *)handle)->get_control(V4L2_CID_BRIGHTNESS); //V4L2_CID_VBLANK: 21
     return handle;
 }
 
@@ -659,6 +684,16 @@ void setformat(void *handle, int width, int height, const char *color)
     ((cv4l2 *)handle)->set_format(width, height, color);
 }
 
+void setcontrol(void *handle, __u32 id, __s32 value)
+{
+    ((cv4l2 *)handle)->set_control(id, value);
+}
+
+__s32 getcontrol(void *handle, __u32 id)
+{
+    return ((cv4l2 *)handle)->get_control(id);
+}
+
 int main(int argc, char **argv)
 {
     struct buffer frame;
@@ -670,7 +705,7 @@ int main(int argc, char **argv)
 
     start(handle);
 
-    for (int i = 0; i < 200; i++)
+    for (int i = 0; i < 120 * 4; i++)
     {
         frame = read(handle);
 

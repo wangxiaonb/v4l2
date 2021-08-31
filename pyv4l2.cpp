@@ -111,6 +111,28 @@ PyObject *py_setformat(PyObject *self, PyObject *args)
     return Py_None;
 }
 
+PyObject *py_setcontrol(PyObject *self, PyObject *args)
+{
+    unsigned long handle;
+    __u32 id;
+    __s32 value;
+    PyArg_ParseTuple(args, "lii", &handle, &id, &value);
+    // printf("set control,id: %d  value: %d\n", id, value);
+    setcontrol((void *)handle, id, value);
+    return Py_None;
+}
+
+PyObject *py_getcontrol(PyObject *self, PyObject *args)
+{
+    unsigned long handle;
+    __u32 id;
+    __s32 value;
+    PyArg_ParseTuple(args, "li", &handle, &id);
+    value = getcontrol((void *)handle, id);
+    // printf("get control,id: %d  value: %d\n", id, value);
+    return PyLong_FromLong(value);
+}
+
 static PyMethodDef py_methods[] = {
     // The first property is the name exposed to Python, fast_tanh, the second is the C++
     // function name that contains the implementation.
@@ -121,6 +143,8 @@ static PyMethodDef py_methods[] = {
     {"stop", (PyCFunction)py_stop, METH_VARARGS, nullptr},
     {"read", (PyCFunction)py_read, METH_VARARGS, nullptr},
     {"setformat", (PyCFunction)py_setformat, METH_VARARGS, nullptr},
+    {"setcontrol", (PyCFunction)py_setcontrol, METH_VARARGS, nullptr},
+    {"getcontrol", (PyCFunction)py_getcontrol, METH_VARARGS, nullptr},
 
     {"echo", (PyCFunction)py_echo, METH_VARARGS, nullptr},
     {"test", (PyCFunction)py_test, METH_VARARGS, nullptr},
