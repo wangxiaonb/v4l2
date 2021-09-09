@@ -374,7 +374,6 @@ void cv4l2::init_device(void)
     {
         crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         crop.c = cropcap.defrect; /* reset to default */
-
         if (-1 == xioctl(fd, VIDIOC_S_CROP, &crop))
         {
             switch (errno)
@@ -393,6 +392,34 @@ void cv4l2::init_device(void)
         /* Errors ignored. */
     }
 
+    //     memset(&crop, 0, sizeof(crop));
+
+    //     crop.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+    //     crop.c = cropcap.defrect;
+
+    //     /* Scale the width and height to 50 % of their original size
+    //    and center the output. */
+
+    //     crop.c.width /= 2;
+    //     crop.c.height /= 2;
+    //     // crop.c.width = 960;
+    //     // crop.c.height = 720;
+    //     crop.c.left += crop.c.width / 2;
+    //     crop.c.top += crop.c.height / 2;
+
+    //     /* Ignore if cropping is not supported (EINVAL). */
+    //     if (-1 == ioctl(fd, VIDIOC_S_CROP, &crop) && errno != EINVAL)
+    //     {
+    //         perror("VIDIOC_S_CROP");
+    //         exit(EXIT_FAILURE);
+    //     }
+
+    //     if (-1 == ioctl(fd, VIDIOC_G_CROP, &crop) && errno != EINVAL)
+    //     {
+    //         perror("VIDIOC_G_CROP");
+    //         exit(EXIT_FAILURE);
+    //     }
+
     CLEAR(fmt);
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -404,10 +431,14 @@ void cv4l2::init_device(void)
         fmt.fmt.pix.width = width;
         fmt.fmt.pix.height = height;
         fmt.fmt.pix.pixelformat = color; //V4L2_PIX_FMT_GREY;
-        fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+        fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
         if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
             errno_exit("VIDIOC_S_FMT");
+
+        fmt.fmt.pix.height = height * 2;
+        if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt))
+            errno_exit("VIDIOC_G_FMT");
 
         /* Note VIDIOC_S_FMT may change width and height. */
     }
@@ -694,12 +725,12 @@ __s32 getcontrol(void *handle, __u32 id)
     return ((cv4l2 *)handle)->get_control(id);
 }
 
-int main(int argc, char **argv)
+int main2(int argc, char **argv)
 {
     struct buffer frame;
 
     // void *handle = open("/dev/video0");
-    void *handle = open("/dev/video0");
+    void *handle = open("/dev/video1", 640, 400, "GREY");
 
     // setformat(handle, 640, 400, "GREY");
 

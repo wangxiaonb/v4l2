@@ -1,45 +1,48 @@
-# # TARGET = gpio_control_user
-# TARGET = v4l2
+# CXX       = g++
+# CFLAGS    = -Wall 
+# LDFLAGS   = `pkg-config --cflags --libs opencv`
 
-# C_INCLUDES =  \
-# -I/usr/include/python3.7m
+# DBG_ENABLE=0
 
-# # CFLAGS = -O0 -g
-# CPPFLAGS = -O0 -g
+# ifeq (1, ${DBG_ENABLE})
+# 	CFLAGS += -D_DEBUG -O0 -g -DDEBUG=1
+# endif
 
-# CPPFLAGS += ${C_INCLUDES}
+# # SRCS = $(wildcard *.cpp)
+# SRCS = test.cpp
+# TARGETS = $(patsubst %.cpp, %,$(SRCS))
 
-# CC = g++
-# # CC += ${CFLAGS}
+# all:build
 
-# # OBJS = test.o add.o
-# OBJS = ${TARGET}.o
+# build:$(TARGETS)
 
-# LIBS = -lm
-
-# ${TARGET}: ${OBJS}
-# 	${CC} -o $@ ${OBJS} ${LIBS} ${CFLAGS}
-
-# .PHONY : clean
-# clean: 
-# 	rm -f ${TARGET} ${OBJS}
-
+# $(TARGETS):%:%.cpp
+# 	$(CXX) $< -o $@ $(CFLAGS) $(LDFLAGS)
+	
 ##################################################################
 # TARGET = ${notdir $(CURDIR)}
 # TARGET = v4l2
-TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
-# TARGET = test
+# TARGET = v4l2_grab
+# TARGET = flash_led
+# TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
+TARGET = test
+
 
 SRC_DIR = .
 SRC_SUBDIR += .
-INCLUDE_DIR += /usr/include/python3.7m
 OBJ_DIR = .
+
+INCLUDES = \
+-I/usr/include/ \
+-I/usr/include/python3.7m 
+
+# -I/usr/local/include/opencv4/
+
 
 CC = g++
 C_FLAGS = -g -Wall
 LD = $(CC)
-INCLUDES += -I$(INCLUDE_DIR)
-LD_FLAFG += 
+LD_FLAGS += -lpthread
 LD_LIBS =
 
 # C_FLAGS += -pthread -DNDEBUG -g -fwrapv -O2 -Wall -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC
@@ -63,8 +66,13 @@ INCLUDE_SRCS=$(wildcard *.$(TYPE))
 ifeq ($(TARGET), v4l2.cpython-37m-arm-linux-gnueabihf.so)
 	LD_FLAGS += -shared
 	EXCLUDE_SRCS = test.cpp
-else
+else ifeq ($(TARGET), test)
+	LD_FLAGS  += `pkg-config --cflags --libs opencv`
+	INCLUDE_SRCS = test.cpp v4l2.cpp
+else  
 	EXCLUDE_SRCS = pyv4l2.cpp
+	EXCLUDE_SRCS += v4l2.cpp
+# EXCLUDE_SRCS += v4l2_grab.cpp
 endif
 
 SRCS = $(filter-out $(EXCLUDE_SRCS),$(INCLUDE_SRCS))

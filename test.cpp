@@ -1,34 +1,128 @@
-// #include "v4l2.hpp"
+#include "v4l2.hpp"
 
-// int main(int argc, char **argv)
+#include <sys/time.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+using namespace cv; // 省去函数前面加cv::的必要性
+
+timeval t0;
+timeval t1;
+
+timeval brenner_t0;
+timeval brenner_t1;
+
+char text[255];
+
+#pragma GCC push_options
+#pragma GCC optimize("O3")
+double brenner(cv::Mat &image)
+{
+    // assert(image.empty());
+
+    // cv::Mat gray_img;
+    // if (image.channels() == 3)
+    // {
+    //     cv::cvtColor(image, gray_img, CV_BGR2GRAY);
+    // }
+    // else
+    // {
+    //     gray_img = image;
+    // }
+
+    double result = .0f;
+    for (int i = 0; i < image.rows; ++i)
+    {
+        uchar *data = image.ptr<uchar>(i);
+        for (int j = 0; j < image.cols - 2; ++j)
+        {
+            result += pow(data[j + 2] - data[j], 2);
+        }
+    }
+
+    return result;
+    // return result / image.total();
+}
+#pragma GCC pop_options
+
+// float brenner(Mat img, int width, int height)
 // {
-//     struct buffer frame;
+//     // '''
+//     // :param img:narray 二维灰度图像
+//     // :return: float 图像越清晰越大
+//     // '''
 
-//     void *handle = open("/dev/video0");
-//     // unsigned long result = (unsigned long)handle;
-//     // printf("c++____handle: open %lu\n",result);
-
-//     start(handle);
-
-//     for (int i = 0; i < 100; i++)
+//     uchar *ptmp = NULL;
+//     float out = 0;
+//     for (int x = 0; x < height - 2; x++)
 //     {
-//         frame = read(handle);
-
-//         // printf("\ndata\n");
-//         // for (int i = 0; i < 640 * 4; i++)
-//         // {
-//         //     printf("%02x ", ((u_char*)frame.start)[i]);
-//         // }
-
-//         fflush(stderr);
-//         fprintf(stderr, ".");
-//         fflush(stdout);
+//         for (int y = 0; y < width; y++)
+//         {
+//             out += ((int)(img.data[x + 2][y]) - (int)(img.data[x][y])) ^ 2;
+//         }
 //     }
 
-//     stop(handle);
-//     close(handle);
-
-//     fprintf(stderr, "\n");
-
-//     return 0;
+//     return out;
 // }
+
+int main(int argc, char **argv)
+{
+    struct buffer data;
+
+    void *handle = open("/dev/video1");
+
+    setcontrol(handle, V4L2_CID_EXPOSURE, 800);     // default:800
+    setcontrol(handle, V4L2_CID_ANALOGUE_GAIN, 60); // default:16
+
+    setcontrol(handle,V4L2_CID_VBLANK ,2000);
+
+    start(handle);
+
+    Mat img = Mat::zeros(400, 640, CV_8U);
+    gettimeofday(&t0, NULL);
+    float t;
+    int fps_count = 0;
+    int fps;
+    double value = 0;
+    float interval;
+
+    for (;;)
+    {
+        data = read(handle);
+        Mat frame(400, 640, CV_8UC1, (unsigned char *)data.start);
+
+        flip(frame, img, 0);
+
+        fps_count += 1;
+        if (fps_count >= 30)
+        {
+            gettimeofday(&t1, NULL);
+            t = (t1.tv_sec - t0.tv_sec) * 1000 + (t1.tv_usec - t0.tv_usec) / 1000;
+            fps = (int)(fps_count * 1000 / t);
+            sprintf(text, "FPS: %d", fps);
+            printf("FPS: %d\n", fps);
+            printf("brenner: %f\n", value);
+            printf("interval: %f\n", interval);
+            fps_count = 0;
+            gettimeofday(&t0, NULL);
+        }
+
+        gettimeofday(&brenner_t0, NULL);
+        value = brenner(img);
+        gettimeofday(&brenner_t1, NULL);
+        interval = (brenner_t1.tv_sec - brenner_t0.tv_sec) * 1000 + (brenner_t1.tv_usec - brenner_t0.tv_usec) / 1000;
+
+        putText(img, text, cv::Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 0), 1); //FONT_HERSHEY_SIMPLEX
+
+        imshow("image", img);
+        waitKey(1);
+    }
+
+    stop(handle);
+    close(handle);
+
+    fprintf(stderr, "\n");
+
+    return 0;
+}

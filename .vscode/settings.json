@@ -12,7 +12,10 @@
         "stdio.h": "c",
         "python.h": "c",
         "*.tcc": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "*.ipp": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
