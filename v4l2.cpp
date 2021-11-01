@@ -34,7 +34,7 @@ cv4l2::~cv4l2()
 /******************************Private*****************************************/
 void cv4l2::errno_exit(const char *s)
 {
-    fprintf(stderr, "%s error %d, %s\\n", s, errno, strerror(errno));
+    fprintf(stderr, "%s error %d, %s\n", s, errno, strerror(errno));
     exit(EXIT_FAILURE);
 }
 
@@ -56,7 +56,7 @@ void cv4l2::init_read(unsigned int buffer_size)
 
     if (!buffers)
     {
-        fprintf(stderr, "Out of memory\\n");
+        fprintf(stderr, "Out of memory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -65,7 +65,7 @@ void cv4l2::init_read(unsigned int buffer_size)
 
     if (!buffers[0].start)
     {
-        fprintf(stderr, "Out of memory\\n");
+        fprintf(stderr, "Out of memory\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -97,7 +97,7 @@ void cv4l2::init_mmap(void)
 
     if (req.count < 2)
     {
-        fprintf(stderr, "Insufficient buffer memory on %s\\n",
+        fprintf(stderr, "Insufficient buffer memory on %s\n",
                 dev_name);
         exit(EXIT_FAILURE);
     }
@@ -106,7 +106,7 @@ void cv4l2::init_mmap(void)
 
     if (!buffers)
     {
-        fprintf(stderr, "Out of memory\\n");
+        fprintf(stderr, "Out of memory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -165,7 +165,7 @@ void cv4l2::init_userp(unsigned int buffer_size)
 
     if (!buffers)
     {
-        fprintf(stderr, "Out of memory\\n");
+        fprintf(stderr, "Out of memory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -176,7 +176,7 @@ void cv4l2::init_userp(unsigned int buffer_size)
 
         if (!buffers[n_buffers].start)
         {
-            fprintf(stderr, "Out of memory\\n");
+            fprintf(stderr, "Out of memory\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -333,7 +333,7 @@ void cv4l2::open_device(void)
     struct stat st;
     if (-1 == stat(dev_name, &st))
     {
-        fprintf(stderr, "Cannot identify '%s': %d, %s\\n",
+        fprintf(stderr, "Cannot identify '%s': %d, %s\n",
                 dev_name, errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -347,7 +347,7 @@ void cv4l2::open_device(void)
     fd = open(dev_name, O_RDWR /* required */ | O_NONBLOCK, 0);
     if (-1 == fd)
     {
-        fprintf(stderr, "Cannot open '%s': %d, %s\\n",
+        fprintf(stderr, "Cannot open '%s': %d, %s\n",
                 dev_name, errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -365,7 +365,7 @@ void cv4l2::init_device(void)
     {
         if (EINVAL == errno)
         {
-            fprintf(stderr, "%s is no V4L2 device\\n",
+            fprintf(stderr, "%s is no V4L2 device\n",
                     dev_name);
             exit(EXIT_FAILURE);
         }
@@ -387,7 +387,7 @@ void cv4l2::init_device(void)
 
     if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
     {
-        fprintf(stderr, "%s is no video capture device\\n",
+        fprintf(stderr, "%s is no video capture device\n",
                 dev_name);
         exit(EXIT_FAILURE);
     }
@@ -397,7 +397,7 @@ void cv4l2::init_device(void)
     case IO_METHOD_READ:
         if (!(cap.capabilities & V4L2_CAP_READWRITE))
         {
-            fprintf(stderr, "%s does not support read i/o\\n",
+            fprintf(stderr, "%s does not support read i/o\n",
                     dev_name);
             exit(EXIT_FAILURE);
         }
@@ -407,7 +407,7 @@ void cv4l2::init_device(void)
     case IO_METHOD_USERPTR:
         if (!(cap.capabilities & V4L2_CAP_STREAMING))
         {
-            fprintf(stderr, "%s does not support streaming i/o\\n",
+            fprintf(stderr, "%s does not support streaming i/o\n",
                     dev_name);
             exit(EXIT_FAILURE);
         }
@@ -717,8 +717,8 @@ void cv4l2::set_sensor_reg(__u8 reg, __u16 data)
     CLEAR(xu_buf);
     xu_buf[0] = UVC_XU_SET_SENSOR_REG;
     xu_buf[1] = reg;
-    xu_buf[2] = data & 0xff;
     xu_buf[3] = data >> 8;
+    xu_buf[2] = data & 0xff;
     xu_transfer(xu_buf);
 }
 
@@ -730,7 +730,7 @@ __u16 cv4l2::get_sensor_reg(__u8 reg)
     xu_buf[1] = reg;
 
     xu_transfer(xu_buf);
-    val = xu_buf[2] << 8 | xu_buf[3];
+    val = xu_buf[2] | xu_buf[3] << 8;
 
     return val;
 }
@@ -806,12 +806,12 @@ __s32 getcontrol(void *handle, __u32 id)
     return ((cv4l2 *)handle)->get_control(id);
 }
 
-void set_sensor_reg(void *handle,__u8 reg, __u16 data)
+void set_sensor_reg(void *handle, __u8 reg, __u16 data)
 {
     ((cv4l2 *)handle)->set_sensor_reg(reg, data);
 }
 
-__u16 get_sensor_reg(void *handle,__u8 reg)
+__u16 get_sensor_reg(void *handle, __u8 reg)
 {
     return ((cv4l2 *)handle)->get_sensor_reg(reg);
 }

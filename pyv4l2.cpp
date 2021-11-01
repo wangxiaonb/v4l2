@@ -133,6 +133,41 @@ PyObject *py_getcontrol(PyObject *self, PyObject *args)
     return PyLong_FromLong(value);
 }
 
+void set_sensor_reg(void *handle, __u8 reg, __u16 data);
+__u16 get_sensor_reg(void *handle, __u8 reg);
+void snapshot(void *handle);
+
+PyObject *py_get_sensor_reg(PyObject *self, PyObject *args)
+{
+    unsigned long handle;
+    __u8 reg;
+    __u16 value;
+    PyArg_ParseTuple(args, "lb", &handle, &reg);
+    value = get_sensor_reg((void *)handle, reg);
+    printf("get_sensor_reg: %d\n", value);
+    return PyLong_FromLong(value);
+}
+
+PyObject *py_set_sensor_reg(PyObject *self, PyObject *args)
+{
+    unsigned long handle;
+    __u8 reg;
+    __s16 value;
+    PyArg_ParseTuple(args, "lbh", &handle, &reg, &value);
+    set_sensor_reg((void *)handle, reg, value);
+    printf("set_sensor_reg: %02x, %04x\n", reg, value);
+    return Py_None;
+}
+
+PyObject *py_snapshot(PyObject *self, PyObject *args)
+{
+    unsigned long handle;
+    PyArg_ParseTuple(args, "l", &handle);
+    snapshot((void *)handle);
+    // printf("snapshot\n");
+    return Py_None;
+}
+
 static PyMethodDef py_methods[] = {
     // The first property is the name exposed to Python, fast_tanh, the second is the C++
     // function name that contains the implementation.
@@ -145,6 +180,9 @@ static PyMethodDef py_methods[] = {
     {"setformat", (PyCFunction)py_setformat, METH_VARARGS, nullptr},
     {"setcontrol", (PyCFunction)py_setcontrol, METH_VARARGS, nullptr},
     {"getcontrol", (PyCFunction)py_getcontrol, METH_VARARGS, nullptr},
+    {"get_sensor_reg", (PyCFunction)py_get_sensor_reg, METH_VARARGS, nullptr},
+    {"set_sensor_reg", (PyCFunction)py_set_sensor_reg, METH_VARARGS, nullptr},
+    {"snapshot", (PyCFunction)py_snapshot, METH_VARARGS, nullptr},
 
     {"echo", (PyCFunction)py_echo, METH_VARARGS, nullptr},
     {"test", (PyCFunction)py_test, METH_VARARGS, nullptr},

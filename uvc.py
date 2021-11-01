@@ -81,6 +81,15 @@ def main():
     # v4l2.setcontrol(camera, vertical_blanking, 3000)
     # value = v4l2.getcontrol(camera, vertical_blanking)
 
+    value = v4l2.get_sensor_reg(camera,0)
+    value = v4l2.get_sensor_reg(camera,0x0b)
+    v4l2.set_sensor_reg(camera,0x0b,500)
+    value = v4l2.get_sensor_reg(camera,0x0b)
+    value = v4l2.get_sensor_reg(camera,0x0b)
+
+    for i in range(1,100):
+        v4l2.snapshot(camera)
+
     t1.start()
 
     frame_count = 0
@@ -91,6 +100,8 @@ def main():
 
     # while frame_count < 1000:
     while True:
+        v4l2.snapshot(camera)
+
         GPIO.output(17, False)
         GPIO.output(18, False)
 

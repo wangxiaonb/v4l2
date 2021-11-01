@@ -18,7 +18,10 @@
         "*.ipp": "cpp",
         "bitset": "cpp",
         "initializer_list": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "optional": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "cmake.configureOnOpen": false
