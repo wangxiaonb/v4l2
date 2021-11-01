@@ -104,5 +104,24 @@ int main(int argc, char **argv)
         printf("UVC_GET_CUR: %08x\r\n", *(u_int32_t *)(&buf));
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    xctrl.query = UVC_SET_CUR;
+    buf[0] = 2;
+
+    for (int i = 0; i < 1000; i++)
+    {
+        ret = xioctl(fd, UVCIOC_CTRL_QUERY, &xctrl);
+        if (ret < 0)
+        {
+            printf("ioctl(UVCIOC_CTRL_QUERY)");
+            printf("%s\n", strerror(errno));
+        }
+        else
+        {
+            printf("UVC_SET_CUR: %08x\r\n", *(u_int32_t *)(&buf));
+        }
+        usleep(1000);
+    }
+
     return 0;
 }

@@ -71,8 +71,11 @@ double brenner(cv::Mat &image)
 #define WIDTH 640
 #define HEIGHT 480
 
+__u8 buffer[WIDTH * HEIGHT];
+
 int main(int argc, char **argv)
 {
+    __u16 regval;
     struct buffer data;
 
     // void *handle = open("/dev/video0");
@@ -80,9 +83,16 @@ int main(int argc, char **argv)
 
     // setformat(handle, 1280,800,'GREY');
 
-    int ret = getcontrol(handle, V4L2_CID_BRIGHTNESS);
+    getcontrol(handle, V4L2_CID_BRIGHTNESS);
     setcontrol(handle, V4L2_CID_BRIGHTNESS, 240);
     setcontrol(handle, V4L2_CID_GAIN, 32);
+
+    regval = get_sensor_reg(handle, 0x0b);
+    printf("get_sensor_reg:%d \r\n", regval);
+
+    set_sensor_reg(handle, 0x0b, 100);
+    regval = get_sensor_reg(handle, 0x0b);
+    printf("get_sensor_reg:%d \r\n", regval);
 
     start(handle);
 
@@ -99,8 +109,20 @@ int main(int argc, char **argv)
 
     for (;;)
     {
+        snapshot(handle);
         data = read(handle);
-        Mat frame(HEIGHT, WIDTH, CV_8UC1, (unsigned char *)data.start);
+
+        __u8* pointer = (__u8*)data.start;
+
+// #pragma GCC push_options
+// #pragma GCC optimize("O1")
+        for (unsigned int i = 0; i < sizeof(buffer); i++)
+        {
+            buffer[i] = pointer[i * 2];
+        }
+// #pragma GCC pop_options
+
+        Mat frame(HEIGHT, WIDTH, CV_8UC1, (unsigned char *)buffer);
 
         flip(frame, img, 0);
         // resize(img, dst, dst.size(), 0, 0, INTER_LINEAR);

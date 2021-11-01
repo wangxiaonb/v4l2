@@ -15,11 +15,20 @@
 #include <sys/ioctl.h>
 
 #include <linux/videodev2.h>
+#include <linux/uvcvideo.h>
+#include <linux/usb/video.h>
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp> 
+#include <opencv2/highgui/highgui.hpp>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
+
+#define UVC_EXTENSION_UNIT_ID 3
+#define UVC_XU_SENSOR_CONTROL 1
+
+#define UVC_XU_GET_SENSOR_REG 0
+#define UVC_XU_SET_SENSOR_REG 1
+#define UVC_XU_SNAPSHOT 2
 
 struct buffer
 {
@@ -46,6 +55,10 @@ public:
     void set_control(__u32 id, __s32 value);
     __s32 get_control(__u32 id);
 
+    void set_sensor_reg(__u8 reg, __u16 data);
+    __u16 get_sensor_reg(__u8 reg);
+    void snapshot();
+
 private:
     void errno_exit(const char *s);
     int xioctl(int fh, int request, void *arg);
@@ -53,8 +66,17 @@ private:
     void init_mmap(void);
     void init_userp(unsigned int buffer_size);
     struct buffer read_frame_real();
+    void xu_transfer(__u8 *buf);
 
 private:
+    struct uvc_xu_control_query xctrl = {
+        unit : UVC_EXTENSION_UNIT_ID,
+        selector : UVC_XU_SENSOR_CONTROL, //CY_FX_UVC_XU_GET_FIRMWARE_VERSION_CONTROL
+        query : UVC_SET_CUR,
+        size : 4,
+        data : NULL
+    };
+
     enum io_method
     {
         IO_METHOD_READ = 1,
@@ -76,6 +98,8 @@ private:
     // __u32 color = 0x59455247;
     __u32 color = V4L2_PIX_FMT_YUYV;
     int frame_count = 100;
+
+    __u8 xu_buf[4];
 };
 
 void *open(const char *dev_name);
@@ -88,3 +112,8 @@ struct buffer read(void *handle);
 void setformat(void *handle, int width, int height, const char *color);
 void setcontrol(void *handle, __u32 id, __s32 value);
 __s32 getcontrol(void *handle, __u32 id);
+
+void set_sensor_reg(void *handle,__u8 reg, __u16 data);
+__u16 get_sensor_reg(void *handle,__u8 reg);
+void snapshot(void *handle);
+

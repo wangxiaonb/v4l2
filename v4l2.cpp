@@ -288,12 +288,49 @@ struct buffer cv4l2::read_frame_real()
     return frame;
 }
 
+void cv4l2::xu_transfer(__u8 *buf)
+{
+    int ret;
+    xctrl.data = buf;
+
+    xctrl.query = UVC_SET_CUR;
+    ret = xioctl(fd, UVCIOC_CTRL_QUERY, &xctrl);
+    if (ret < 0)
+    {
+        printf("UVC_SET_CUR %s\n", strerror(errno));
+    }
+    else
+    {
+        // printf("UVC_SET_CUR: ");
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     printf("%02x", buf[i]);
+        // }
+        // printf("\r\n");
+    }
+
+    xctrl.query = UVC_GET_CUR;
+    ret = xioctl(fd, UVCIOC_CTRL_QUERY, &xctrl);
+    if (ret < 0)
+    {
+        printf("UVC_GET_CUR %s\n", strerror(errno));
+    }
+    else
+    {
+        // printf("UVC_GET_CUR: ");
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     printf("%02x", buf[i]);
+        // }
+        // printf("\r\n");
+    }
+}
+
 /*******************************Public*******************************************/
 
 void cv4l2::open_device(void)
 {
     struct stat st;
-
     if (-1 == stat(dev_name, &st))
     {
         fprintf(stderr, "Cannot identify '%s': %d, %s\\n",
@@ -308,7 +345,6 @@ void cv4l2::open_device(void)
     }
 
     fd = open(dev_name, O_RDWR /* required */ | O_NONBLOCK, 0);
-
     if (-1 == fd)
     {
         fprintf(stderr, "Cannot open '%s': %d, %s\\n",
@@ -666,40 +702,6 @@ void cv4l2::set_control(__u32 id, __s32 value)
 
 __s32 cv4l2::get_control(__u32 id)
 {
-/*********************************************************************/
-#define UVC_EU1_ID 0x06
-#define EU1_TEST_CMD 0x03
-#define EU1_TEST_CMD_LEN 0x05
-
-    unsigned char buf[EU1_TEST_CMD_LEN];
-    struct uvc_xu_control_query xu_ctrl_query =
-        {
-            .unit = UVC_EU1_ID,
-            .selector = EU1_TEST_CMD,
-            .query = UVC_GET_CUR,
-            .size = EU1_TEST_CMD_LEN,
-            .data = buf,
-        };
-    int ret = ioctl(fd, UVCIOC_CTRL_QUERY, &xu_ctrl_query);
-    printf("\r\nioctl(fd, UVCIOC_CTRL_QUERY, &xu_ctrl_query) %d\r\n",ret );
-    if (ret < 0)
-    {
-        printf("query fail!\n");
-        printf("%s\n", strerror(errno));
-    }
-    else
-    {
-        printf("query success!\n");
-        int i;
-        printf("data:");
-        for (i = 0; i < EU1_TEST_CMD_LEN; i++)
-        {
-            printf("%#x ", buf[i]);
-        }
-        printf("\n");
-    }
-/*********************************************************************/
-
     struct v4l2_control ctrl;
     ctrl.id = id;
     if (-1 == ioctl(fd, VIDIOC_G_CTRL, &ctrl))
@@ -708,6 +710,36 @@ __s32 cv4l2::get_control(__u32 id)
     }
     printf("\nGet Control id: %04x, value: %d\n", ctrl.id, ctrl.value);
     return ctrl.value;
+}
+
+void cv4l2::set_sensor_reg(__u8 reg, __u16 data)
+{
+    CLEAR(xu_buf);
+    xu_buf[0] = UVC_XU_SET_SENSOR_REG;
+    xu_buf[1] = reg;
+    xu_buf[2] = data & 0xff;
+    xu_buf[3] = data >> 8;
+    xu_transfer(xu_buf);
+}
+
+__u16 cv4l2::get_sensor_reg(__u8 reg)
+{
+    __u16 val;
+    CLEAR(xu_buf);
+    xu_buf[0] = UVC_XU_GET_SENSOR_REG;
+    xu_buf[1] = reg;
+
+    xu_transfer(xu_buf);
+    val = xu_buf[2] << 8 | xu_buf[3];
+
+    return val;
+}
+
+void cv4l2::snapshot()
+{
+    CLEAR(xu_buf);
+    xu_buf[0] = UVC_XU_SNAPSHOT;
+    xu_transfer(xu_buf);
 }
 
 /*********************************Extern*****************************************/
@@ -772,6 +804,21 @@ void setcontrol(void *handle, __u32 id, __s32 value)
 __s32 getcontrol(void *handle, __u32 id)
 {
     return ((cv4l2 *)handle)->get_control(id);
+}
+
+void set_sensor_reg(void *handle,__u8 reg, __u16 data)
+{
+    ((cv4l2 *)handle)->set_sensor_reg(reg, data);
+}
+
+__u16 get_sensor_reg(void *handle,__u8 reg)
+{
+    return ((cv4l2 *)handle)->get_sensor_reg(reg);
+}
+
+void snapshot(void *handle)
+{
+    ((cv4l2 *)handle)->snapshot();
 }
 
 /**********************************************************************************/

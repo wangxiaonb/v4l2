@@ -26,9 +26,9 @@
 # TARGET = flash_led
 # TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
 # TARGET = test
-# TARGET = uvc
+TARGET = uvc
 # TARGET = uvc2
-TARGET = uvc3
+# TARGET = uvc3
 
 
 SRC_DIR = .
@@ -76,7 +76,7 @@ else ifeq ($(TARGET), test)
 else ifeq ($(TARGET), v4l2)
 	LD_FLAGS  += `pkg-config --cflags --libs opencv`
 	INCLUDE_SRCS = v4l2.cpp
-else ifeq ($(TARGET), uvc3)
+else ifeq ($(TARGET), uvc)
 	LD_FLAGS  += `pkg-config --cflags --libs opencv`
 	INCLUDE_SRCS = $(TARGET).cpp v4l2.cpp
 else
