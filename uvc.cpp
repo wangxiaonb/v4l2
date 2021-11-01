@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 
     for (;;)
     {
-        snapshot(handle);
+        // snapshot(handle);
         data = read(handle);
 
         __u8* pointer = (__u8*)data.start;

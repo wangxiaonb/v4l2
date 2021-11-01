@@ -21,12 +21,12 @@
 	
 ##################################################################
 # TARGET = ${notdir $(CURDIR)}
+TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
 # TARGET = v4l2
 # TARGET = v4l2_grab
 # TARGET = flash_led
-# TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
 # TARGET = test
-TARGET = uvc
+# TARGET = uvc
 # TARGET = uvc2
 # TARGET = uvc3
 
@@ -63,13 +63,14 @@ endif
 
 
 # INCLUDE_SRCS = ${foreach subdir, $(SRC_SUBDIR), ${wildcard $(SRC_DIR)/$(subdir)/*.$(TYPE)}}
-INCLUDE_SRCS=$(wildcard *.$(TYPE))
+# INCLUDE_SRCS=$(wildcard *.$(TYPE))
 
 # EXCLUDE_SRCS = ${foreach subdir, $(SRC_SUBDIR), ${wildcard $(SRC_DIR)/$(subdir)/pyv4l2.$(TYPE)}}
 
 ifeq ($(TARGET), v4l2.cpython-37m-arm-linux-gnueabihf.so)
 	LD_FLAGS += -shared
-	EXCLUDE_SRCS = test.cpp
+	LD_FLAGS += `pkg-config --cflags --libs opencv`
+	INCLUDE_SRCS = pyv4l2.cpp v4l2.cpp
 else ifeq ($(TARGET), test)
 	LD_FLAGS  += `pkg-config --cflags --libs opencv`
 	INCLUDE_SRCS = test.cpp v4l2.cpp
