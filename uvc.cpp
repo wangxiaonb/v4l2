@@ -68,22 +68,21 @@ double brenner(cv::Mat &image)
 
 // #define WIDTH 640
 // #define HEIGHT 400
-#define WIDTH 1280
-#define HEIGHT 800
+#define WIDTH 640
+#define HEIGHT 480
 
 int main(int argc, char **argv)
 {
     struct buffer data;
 
     // void *handle = open("/dev/video0");
-    void *handle = open("/dev/video0", WIDTH, HEIGHT, "GREY"); //ssjhs GREY, not GRAY!!!!!!!!!!
+    void *handle = open("/dev/video2", WIDTH, HEIGHT, "YUYV"); //ssjhs GREY, not GRAY!!!!!!!!!!
 
     // setformat(handle, 1280,800,'GREY');
 
-    setcontrol(handle, V4L2_CID_EXPOSURE, 400);     // default:800
-    setcontrol(handle, V4L2_CID_ANALOGUE_GAIN, 32); // default:16
-
-    setcontrol(handle, V4L2_CID_VBLANK, 1000);
+    int ret = getcontrol(handle, V4L2_CID_BRIGHTNESS);
+    setcontrol(handle, V4L2_CID_BRIGHTNESS, 240);
+    setcontrol(handle, V4L2_CID_GAIN, 32);
 
     start(handle);
 
@@ -95,7 +94,7 @@ int main(int argc, char **argv)
     // float interval;
 
     Mat img = Mat::zeros(HEIGHT, WIDTH, CV_8U);
-    Mat dst = Mat::zeros(480, 768, CV_8UC1);
+    // Mat dst = Mat::zeros(480, 768, CV_8UC1);
     // Mat dst = Mat::zeros(600, 960, CV_8UC1);
 
     for (;;)
@@ -104,7 +103,7 @@ int main(int argc, char **argv)
         Mat frame(HEIGHT, WIDTH, CV_8UC1, (unsigned char *)data.start);
 
         flip(frame, img, 0);
-        resize(img, dst, dst.size(), 0, 0, INTER_LINEAR);
+        // resize(img, dst, dst.size(), 0, 0, INTER_LINEAR);
 
         fps_count += 1;
         if (fps_count >= 30)
@@ -125,9 +124,9 @@ int main(int argc, char **argv)
         // gettimeofday(&brenner_t1, NULL);
         // interval = (brenner_t1.tv_sec - brenner_t0.tv_sec) * 1000 + (brenner_t1.tv_usec - brenner_t0.tv_usec) / 1000;
 
-        putText(dst, text, cv::Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 0), 1); //FONT_HERSHEY_SIMPLEX
+        putText(img, text, cv::Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 0), 1); //FONT_HERSHEY_SIMPLEX
 
-        imshow("image", dst);
+        imshow("image", img);
         waitKey(1);
     }
 

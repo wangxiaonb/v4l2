@@ -69,9 +69,12 @@ private:
     unsigned int n_buffers;
     int out_buf;
     int force_format = 1;
-    int width = 1280;
-    int height = 800;
-    __u32 color = 0x59455247;
+    // int width = 1280;
+    // int height = 800;
+    int width = 640;
+    int height = 480;
+    // __u32 color = 0x59455247;
+    __u32 color = V4L2_PIX_FMT_YUYV;
     int frame_count = 100;
 };
 

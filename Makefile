@@ -25,7 +25,10 @@
 # TARGET = v4l2_grab
 # TARGET = flash_led
 # TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
-TARGET = test
+# TARGET = test
+# TARGET = uvc
+# TARGET = uvc2
+TARGET = uvc3
 
 
 SRC_DIR = .
@@ -34,7 +37,8 @@ OBJ_DIR = .
 
 INCLUDES = \
 -I/usr/include/ \
--I/usr/include/python3.7m 
+-I/usr/include/python3.7m \
+-I/usr/local/include/
 
 # -I/usr/local/include/opencv4/
 
@@ -69,7 +73,13 @@ ifeq ($(TARGET), v4l2.cpython-37m-arm-linux-gnueabihf.so)
 else ifeq ($(TARGET), test)
 	LD_FLAGS  += `pkg-config --cflags --libs opencv`
 	INCLUDE_SRCS = test.cpp v4l2.cpp
-else  
+else ifeq ($(TARGET), v4l2)
+	LD_FLAGS  += `pkg-config --cflags --libs opencv`
+	INCLUDE_SRCS = v4l2.cpp
+else ifeq ($(TARGET), uvc3)
+	LD_FLAGS  += `pkg-config --cflags --libs opencv`
+	INCLUDE_SRCS = $(TARGET).cpp v4l2.cpp
+else
 	EXCLUDE_SRCS = pyv4l2.cpp
 	EXCLUDE_SRCS += v4l2.cpp
 # EXCLUDE_SRCS += v4l2_grab.cpp

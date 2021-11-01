@@ -9,6 +9,10 @@
 
 #include "v4l2.hpp"
 
+#include <linux/uvcvideo.h>
+#include <linux/usb/video.h>
+#include <errno.h>
+
 /***************************************************************************/
 cv4l2 ::cv4l2(const char *dev)
 {
@@ -334,6 +338,16 @@ void cv4l2::init_device(void)
             errno_exit("VIDIOC_QUERYCAP");
         }
     }
+    else
+    {
+        // Print capability infomations
+        printf("Capability Informations:\n");
+        printf(" driver: %s\n", cap.driver);
+        printf(" card: %s\n", cap.card);
+        printf(" bus_info: %s\n", cap.bus_info);
+        printf(" version: %08X\n", cap.version);
+        printf(" capabilities: %08X\n", cap.capabilities);
+    }
 
     if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
     {
@@ -652,6 +666,40 @@ void cv4l2::set_control(__u32 id, __s32 value)
 
 __s32 cv4l2::get_control(__u32 id)
 {
+/*********************************************************************/
+#define UVC_EU1_ID 0x06
+#define EU1_TEST_CMD 0x03
+#define EU1_TEST_CMD_LEN 0x05
+
+    unsigned char buf[EU1_TEST_CMD_LEN];
+    struct uvc_xu_control_query xu_ctrl_query =
+        {
+            .unit = UVC_EU1_ID,
+            .selector = EU1_TEST_CMD,
+            .query = UVC_GET_CUR,
+            .size = EU1_TEST_CMD_LEN,
+            .data = buf,
+        };
+    int ret = ioctl(fd, UVCIOC_CTRL_QUERY, &xu_ctrl_query);
+    printf("\r\nioctl(fd, UVCIOC_CTRL_QUERY, &xu_ctrl_query) %d\r\n",ret );
+    if (ret < 0)
+    {
+        printf("query fail!\n");
+        printf("%s\n", strerror(errno));
+    }
+    else
+    {
+        printf("query success!\n");
+        int i;
+        printf("data:");
+        for (i = 0; i < EU1_TEST_CMD_LEN; i++)
+        {
+            printf("%#x ", buf[i]);
+        }
+        printf("\n");
+    }
+/*********************************************************************/
+
     struct v4l2_control ctrl;
     ctrl.id = id;
     if (-1 == ioctl(fd, VIDIOC_G_CTRL, &ctrl))
@@ -680,6 +728,7 @@ void *open(const char *dev_name, int width, int height, const char *color)
     handle = (void *)new cv4l2(dev_name, width, height, color);
     ((cv4l2 *)handle)->open_device();
     ((cv4l2 *)handle)->init_device();
+
     // ((cv4l2 *)handle)->set_control(V4L2_CID_EXPOSURE_AUTO,V4L2_EXPOSURE_AUTO);
     // ((cv4l2 *)handle)->set_control(V4L2_CID_EXPOSURE,800);
     // ((cv4l2 *)handle)->set_control(V4L2_CID_HBLANK, 816);//V4L2_CID_HBLANK: 816
@@ -725,43 +774,75 @@ __s32 getcontrol(void *handle, __u32 id)
     return ((cv4l2 *)handle)->get_control(id);
 }
 
+/**********************************************************************************/
+
+#include <sys/time.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+// #define WIDTH 640
+// #define HEIGHT 400
+
+#define WIDTH 1280
+#define HEIGHT 800
+
+using namespace cv;
+
+static timeval t0;
+static timeval t1;
+static char text[255];
+
 int main2(int argc, char **argv)
 {
-    struct buffer frame;
+    struct buffer data;
+    void *handle;
 
-    // void *handle = open("/dev/video0");
-    void *handle = open("/dev/video1", 640, 400, "GREY");
+    // handle = open("/dev/video0");
+    handle = open("/dev/video0", WIDTH, HEIGHT, "GREY");
 
-    // setformat(handle, 640, 400, "GREY");
+    setcontrol(handle, V4L2_CID_EXPOSURE, 800);     // default:800
+    setcontrol(handle, V4L2_CID_ANALOGUE_GAIN, 60); // default:16
+
+    setcontrol(handle, V4L2_CID_VBLANK, 2200);
+
+    Mat img = Mat::zeros(HEIGHT, WIDTH, CV_8U);
+    Mat dst = Mat::zeros(480, 768, CV_8U);
+    gettimeofday(&t0, NULL);
+    float t;
+    int fps_count = 0;
+    int fps;
 
     start(handle);
 
-    for (int i = 0; i < 120 * 4; i++)
+    for (;;)
     {
-        frame = read(handle);
+        data = read(handle);
+        Mat frame(HEIGHT, WIDTH, CV_8UC1, (unsigned char *)data.start);
 
-        // printf("\ndata\n");
-        // for (int i = 0; i < 640 * 4; i++)
-        // {
-        //     printf("%02x ", ((u_char*)frame.start)[i]);
-        // }
+        flip(frame, img, 0);
+        resize(img, dst, dst.size(), 0, 0, INTER_LINEAR);
 
-        fflush(stderr);
-        fprintf(stderr, ".");
-        fflush(stdout);
+        fps_count += 1;
+        if (fps_count >= 30)
+        {
+            gettimeofday(&t1, NULL);
+            t = (t1.tv_sec - t0.tv_sec) * 1000 + (t1.tv_usec - t0.tv_usec) / 1000;
+            fps = (int)(fps_count * 1000 / t);
+            sprintf(text, "FPS: %d", fps);
+            printf("FPS: %d\n", fps);
+            fps_count = 0;
+            gettimeofday(&t0, NULL);
+        }
+
+        putText(dst, text, cv::Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(127, 127, 127), 1); //FONT_HERSHEY_SIMPLEX
+
+        imshow("image", dst);
+        waitKey(1);
     }
 
     stop(handle);
     close(handle);
-
-    // cv4l2 *v4l2_0 = new cv4l2("/dev/video0");
-    // v4l2_0->open_device();
-    // v4l2_0->init_device();
-    // v4l2_0->start_capturing();
-    // v4l2_0->mainloop();
-    // v4l2_0->stop_capturing();
-    // v4l2_0->uninit_device();
-    // v4l2_0->close_device();
 
     fprintf(stderr, "\n");
 
