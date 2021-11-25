@@ -54,7 +54,7 @@ def main():
     t1 = threading.Thread(target=thread_show)
 
     # camera = v4l2.open('/dev/video0')
-    camera = v4l2.open2('/dev/video0', width, height, 'GREY')
+    camera = v4l2.open2('/dev/video2', width, height, 'GREY')
     v4l2.start(camera)
     # v4l2.setformat(camera,width,height,'GREY')
 
@@ -65,7 +65,7 @@ def main():
     # value = v4l2.getcontrol(camera,V4L2_CID_HBLANK)
 
     # value = v4l2.getcontrol(camera, vertical_blanking)
-    # v4l2.setcontrol(camera, vertical_blanking, 3000)
+    v4l2.setcontrol(camera, vertical_blanking, 3500)
     # value = v4l2.getcontrol(camera, vertical_blanking)
 
     t1.start()
@@ -105,15 +105,15 @@ def main():
 
             image = cv2.resize(image, (768, 480))
 
-            image = cv2.flip(image, 0)
+            # image = cv2.flip(image, 0)
 
             image = cv2.putText(image, 'FPS:'+str(fps), (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (127, 127, 127), 1)
 
-            lock.acquire()
-            g_image = image
-            lock.release()
-            semaphore.release()
+            # lock.acquire()
+            # g_image = image
+            # lock.release()
+            # semaphore.release()
 
         cv2.imshow('image', image)
         key = cv2.waitKey(1)
@@ -130,10 +130,10 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
 GPIO.setup(18, GPIO.OUT)
 
-# width, height = 1280, 800
+width, height = 1280, 800
 # width, height = 1280, 720
 # width, height = 640, 480
-width, height = 640, 400
+# width, height = 640, 400
 g_image = np.zeros((height, width), dtype=np.uint8)
 lock = threading.Lock()
 semaphore = threading.Semaphore(0)

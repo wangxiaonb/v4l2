@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     regval = get_sensor_reg(handle, 0x0b);
     printf("get_sensor_reg:%d \r\n", regval);
 
-    set_sensor_reg(handle, 0x0b, 100);
+    set_sensor_reg(handle, 0x0b, 300);
     regval = get_sensor_reg(handle, 0x0b);
     printf("get_sensor_reg:%d \r\n", regval);
 

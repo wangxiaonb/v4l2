@@ -21,11 +21,11 @@
 	
 ##################################################################
 # TARGET = ${notdir $(CURDIR)}
-TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
+# TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
 # TARGET = v4l2
-# TARGET = v4l2_grab
+TARGET = v4l2_grab
 # TARGET = flash_led
-# TARGET = test
+# TARGET = ov9281
 # TARGET = uvc
 # TARGET = uvc2
 # TARGET = uvc3
@@ -71,9 +71,9 @@ ifeq ($(TARGET), v4l2.cpython-37m-arm-linux-gnueabihf.so)
 	LD_FLAGS += -shared
 	LD_FLAGS += `pkg-config --cflags --libs opencv`
 	INCLUDE_SRCS = pyv4l2.cpp v4l2.cpp
-else ifeq ($(TARGET), test)
+else ifeq ($(TARGET), ov9281)
 	LD_FLAGS  += `pkg-config --cflags --libs opencv`
-	INCLUDE_SRCS = test.cpp v4l2.cpp
+	INCLUDE_SRCS = $(TARGET).cpp v4l2.cpp
 else ifeq ($(TARGET), v4l2)
 	LD_FLAGS  += `pkg-config --cflags --libs opencv`
 	INCLUDE_SRCS = v4l2.cpp

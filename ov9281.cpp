@@ -83,7 +83,7 @@ int main(int argc, char **argv)
     setcontrol(handle, V4L2_CID_EXPOSURE, 400);     // default:800
     setcontrol(handle, V4L2_CID_ANALOGUE_GAIN, 32); // default:16
 
-    setcontrol(handle, V4L2_CID_VBLANK, 1000);
+    setcontrol(handle, V4L2_CID_VBLANK, 3500);
 
     start(handle);
 
@@ -95,8 +95,9 @@ int main(int argc, char **argv)
     // float interval;
 
     Mat img = Mat::zeros(HEIGHT, WIDTH, CV_8U);
-    Mat dst = Mat::zeros(480, 768, CV_8UC1);
+    // Mat dst = Mat::zeros(480, 768, CV_8UC1);
     // Mat dst = Mat::zeros(600, 960, CV_8UC1);
+    Mat dst = Mat::zeros(800, 1280, CV_8UC1);
 
     for (;;)
     {
