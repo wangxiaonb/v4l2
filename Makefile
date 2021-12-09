@@ -23,12 +23,13 @@
 # TARGET = ${notdir $(CURDIR)}
 # TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
 # TARGET = v4l2
-TARGET = v4l2_grab
+# TARGET = v4l2_grab
 # TARGET = flash_led
 # TARGET = ov9281
 # TARGET = uvc
 # TARGET = uvc2
 # TARGET = uvc3
+TARGET = render
 
 
 SRC_DIR = .
@@ -44,10 +45,9 @@ INCLUDES = \
 
 
 CC = g++
-C_FLAGS = -g -Wall
+C_FLAGS = -g -O0 -Wall
 LD = $(CC)
 LD_FLAGS += -lpthread
-LD_LIBS =
 
 # C_FLAGS += -pthread -DNDEBUG -g -fwrapv -O2 -Wall -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -fPIC
 
@@ -79,6 +79,14 @@ else ifeq ($(TARGET), v4l2)
 	INCLUDE_SRCS = v4l2.cpp
 else ifeq ($(TARGET), uvc)
 	LD_FLAGS  += `pkg-config --cflags --libs opencv`
+	INCLUDE_SRCS = $(TARGET).cpp v4l2.cpp
+else ifeq ($(TARGET), v4l2_grab)
+	LD_FLAGS  += `pkg-config --cflags --libs opencv`
+	INCLUDE_SRCS = $(TARGET).cpp flash_led.cpp
+else ifeq ($(TARGET), render)
+	LD_FLAGS  += `pkg-config --cflags --libs opencv`
+	C_FLAGS += -I/opt/vc/include -pipe -W -Wextra
+	LD_LIBS = -L/opt/vc/lib -lrt -lbcm_host -lvcos -lvchiq_arm -pthread -lmmal_core -lmmal_util -lmmal_vc_client -lvcsm
 	INCLUDE_SRCS = $(TARGET).cpp v4l2.cpp
 else
 	EXCLUDE_SRCS = pyv4l2.cpp

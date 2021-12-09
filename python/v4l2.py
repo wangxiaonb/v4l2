@@ -103,7 +103,7 @@ def main():
             image_array = np.frombuffer(data, dtype=np.uint8)
             image = image_array.reshape(height, width)
 
-            image = cv2.resize(image, (768, 480))
+            # image = cv2.resize(image, (768, 480))
 
             # image = cv2.flip(image, 0)
 

@@ -106,7 +106,7 @@ static void *thread1(void *arg)
         pthread_exit(0);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
         printf("argc:%d\n", argc);
         if (argc >= 3)
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
         }
         if ((fmt.fmt.pix.width != WIDTH) || (fmt.fmt.pix.height != HEIGHT))
                 printf("Warning: driver is sending image at %dx%d\\n",
-                       fmt.fmt.pix.width, fmt.fmt.pix.height);
+                        fmt.fmt.pix.width, fmt.fmt.pix.height);
 
         CLEAR(req);
         req.count = 2;
@@ -198,8 +198,8 @@ int main(int argc, char **argv)
         set_control(fd, V4L2_CID_EXPOSURE, exposure_time);
         set_control(fd, V4L2_CID_ANALOGUE_GAIN, 16); //default:16
         // set_control(fd,V4L2_CID_PIXEL_RATE,20000);//default=200000000 value=2000000
-        set_control(fd,V4L2_CID_VBLANK,4000);//min=21 max=32367 step=1 default=21 value=21
-        value = get_control(fd,V4L2_CID_HBLANK);//min=816 max=816 step=1 default=816 value=816 flags=read-only
+        set_control(fd, V4L2_CID_VBLANK, 4000);   //min=21 max=32367 step=1 default=21 value=21
+        value = get_control(fd, V4L2_CID_HBLANK); //min=816 max=816 step=1 default=816 value=816 flags=read-only
 
         xioctl(fd, VIDIOC_STREAMON, &type);
 

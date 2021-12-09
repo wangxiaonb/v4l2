@@ -3,7 +3,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "make -f Makefile -j12",
+            "command": "make -j4",
             "problemMatcher": [],
             "group": "build"
         },

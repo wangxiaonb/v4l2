@@ -54,7 +54,7 @@ def main():
     t1 = threading.Thread(target=thread_show)
 
     # camera = v4l2.open('/dev/video0')
-    camera = v4l2.open2('/dev/video2', width, height, 'GREY')
+    camera = v4l2.open2('/dev/video0', width, height, 'GREY')
     v4l2.start(camera)
     # v4l2.setformat(camera,width,height,'GREY')
 
@@ -79,12 +79,10 @@ def main():
     # while frame_count < 1000:
     while True:
         GPIO.output(17, False)
-        GPIO.output(18, False)
 
         data = v4l2.read(camera)
 
         GPIO.output(17, True)
-        GPIO.output(18, True)
 
         # time.sleep(0.005)
 

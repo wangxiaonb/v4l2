@@ -37,7 +37,7 @@ void led_init(int pin)
     gpio.pin = pin;
     gpio.value = 0;
 
-    system("sudo insmod /home/pi/app/kernel/gpio_control.ko");
+    system("sudo insmod /home/pi/server/kernel/gpio_control.ko");
     system("sudo chown pi:pi /dev/led_control_demo");
     fd = open("/dev/led_control_demo", O_RDWR);
     if (fd < 0)
