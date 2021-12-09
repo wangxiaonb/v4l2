@@ -116,7 +116,7 @@ int main()
         param.hdr.size = sizeof(MMAL_DISPLAYREGION_T);
 
         param.set = MMAL_DISPLAY_SET_LAYER;
-        param.layer = 128; //On top of most things
+        param.layer = 127; //On top of most things
 
         param.set |= MMAL_DISPLAY_SET_ALPHA;
         param.alpha = 255; //0 = transparent, 255 = opaque
@@ -124,7 +124,7 @@ int main()
         param.set |= (MMAL_DISPLAY_SET_DEST_RECT | MMAL_DISPLAY_SET_FULLSCREEN);
         param.fullscreen = 0;
         param.dest_rect.x = 0;
-        param.dest_rect.y = 100;
+        param.dest_rect.y = 0;
         param.dest_rect.width = WIDTH;
         param.dest_rect.height = HEIGHT;
         mmal_port_parameter_set(input, &param.hdr);
