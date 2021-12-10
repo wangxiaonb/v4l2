@@ -1,0 +1,16 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/pi/server/v4l2'
+mkdir -p build
+echo "Compiling" build/dma.o "from" dma.cpp "..."
+g++ -c -o build/dma.o dma.cpp -g -O0 -Wall -I/usr/include/ -I/usr/include/python3.7m -I/usr/local/include/
+mkdir -p build
+echo "Compiling" build/v4l2.o "from" v4l2.cpp "..."
+g++ -c -o build/v4l2.o v4l2.cpp -g -O0 -Wall -I/usr/include/ -I/usr/include/python3.7m -I/usr/local/include/
+mkdir -p .
+echo "Linking" dma "from" build/dma.o build/v4l2.o "..."
+g++ -o exec/dma build/dma.o build/v4l2.o -lpthread `pkg-config --cflags --libs opencv` 
+echo "Link finished\n"
+echo "Builded target:" dma
+echo "Done"
+make: Leaving directory '/home/pi/server/v4l2'
+ 

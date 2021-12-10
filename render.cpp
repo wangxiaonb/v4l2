@@ -24,7 +24,7 @@
 
 using namespace cv;
 
-#define ENCODING MMAL_ENCODING_RGB24
+#define ENCODING MMAL_ENCODING_BGR24
 // #define ENCODING 0x59455247
 // #define ENCODING MMAL_ENCODING_YUV10_COL
 #define WIDTH 1280
@@ -80,8 +80,6 @@ int main()
     mmal_component_create("vc.ril.video_render", &render);
     input = render->input[0];
 
-    print_supported_formats(input);
-
     input->format->encoding = ENCODING;
     input->format->es->video.width = VCOS_ALIGN_UP(WIDTH, 32);
     input->format->es->video.height = VCOS_ALIGN_UP(HEIGHT, 16);
@@ -102,13 +100,15 @@ int main()
     input->buffer_num = input->buffer_num_recommended;
     if (input->buffer_num < 2)
         input->buffer_num = 2;
-    pool = mmal_port_pool_create(input, input->buffer_num, input->buffer_size);
 
+    pool = mmal_port_pool_create(input, input->buffer_num, input->buffer_size);
     if (!pool)
     {
         printf("Oops, ,pool alloc failed\n");
         return -1;
     }
+
+    mmal_port_enable(input, callback_vr_input);
 
     {
         MMAL_DISPLAYREGION_T param;
@@ -124,13 +124,13 @@ int main()
         param.set |= (MMAL_DISPLAY_SET_DEST_RECT | MMAL_DISPLAY_SET_FULLSCREEN);
         param.fullscreen = 0;
         param.dest_rect.x = 0;
-        param.dest_rect.y = 0;
+        param.dest_rect.y = 100;
         param.dest_rect.width = WIDTH;
         param.dest_rect.height = HEIGHT;
         mmal_port_parameter_set(input, &param.hdr);
     }
 
-    mmal_port_enable(input, callback_vr_input);
+    // mmal_port_enable(input, callback_vr_input);
     /*******************************************************************/
     struct buffer data;
     void *handle;
@@ -147,10 +147,11 @@ int main()
     gettimeofday(&t0, NULL);
     float t;
     int fps_count = 0;
-    int fps;
+    int fps = 0;
+    sprintf(text, "FPS:      ");
 
     Mat bgr;
-    Mat rgb24;
+    Mat bgr24;
 
     start(handle);
 
@@ -161,7 +162,7 @@ int main()
 
         // flip(frame, img, 0);
         // resize(img, dst, dst.size(), 0, 0, INTER_LINEAR);
-        cvtColor(frame, rgb24, CV_GRAY2RGB);
+        cvtColor(frame, bgr24, CV_GRAY2BGR);
 
         fps_count += 1;
         if (fps_count >= 30)
@@ -169,13 +170,14 @@ int main()
             gettimeofday(&t1, NULL);
             t = (t1.tv_sec - t0.tv_sec) * 1000 + (t1.tv_usec - t0.tv_usec) / 1000;
             fps = (int)(fps_count * 1000 / t);
+            memset(text, 0, sizeof(text));
             sprintf(text, "FPS: %d", fps);
             printf("FPS: %d\n", fps);
             fps_count = 0;
             gettimeofday(&t0, NULL);
         }
 
-        putText(rgb24, text, cv::Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(240, 100, 100), 1); //FONT_HERSHEY_SIMPLEX
+        putText(bgr24, text, cv::Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(100, 100, 240), 2); //FONT_HERSHEY_SIMPLEX
 
         /**************************************************/
         buffer = mmal_queue_wait(pool->queue);
@@ -184,13 +186,13 @@ int main()
         // memset(buffer->data, (i << 4) & 0xff, buffer->alloc_size);
         // memset(buffer->data, i, buffer->alloc_size / 2);
         // memset(buffer->data + buffer->alloc_size / 2, 0xff - i, buffer->alloc_size / 2);
-        memcpy(buffer->data, rgb24.data, buffer->alloc_size);
+        memcpy(buffer->data, bgr24.data, buffer->alloc_size);
 
         buffer->length = buffer->alloc_size;
         mmal_port_send_buffer(input, buffer);
 
         /**************************************************/
-        // imshow("image", rgb24);
+        // imshow("image", bgr24);
         // waitKey(1);
     }
 

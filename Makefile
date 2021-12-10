@@ -8,7 +8,9 @@
 # TARGET = uvc
 # TARGET = uvc2
 # TARGET = uvc3
-TARGET = render
+# TARGET = render
+TARGET = mmal
+# TARGET = dma
 
 
 SRC_DIR = .
@@ -34,8 +36,8 @@ endif
 
 ifeq ($(TARGET), v4l2.cpython-37m-arm-linux-gnueabihf.so)
 	LD_FLAGS += -shared
-	INCLUDE_SRCS = pyv4l2.cpp v4l2.cpp
-else ifeq ($(TARGET), render)
+	INCLUDE_SRCS := pyv4l2.cpp v4l2.cpp
+else ifneq ($(findstring $(TARGET),  mmal render),)
 	C_FLAGS += -I/opt/vc/include -pipe -W -Wextra
 	LD_LIBS = -L/opt/vc/lib -lrt -lbcm_host -lvcos -lvchiq_arm -pthread -lmmal_core -lmmal_util -lmmal_vc_client -lvcsm
 else ifeq ($(TARGET), v4l2_grab)
@@ -57,11 +59,12 @@ else
 all : $(TARGET)
 	@echo "Builded target:" $^
 	@echo "Done"
+	cp $(TARGET) exec
 
 $(TARGET) : $(OBJS)
 	@mkdir -p $(@D)
 	@echo "Linking" $@ "from" $^ "..."
-	$(LD) -o exec/$@ $^ $(LD_FLAGS) $(LD_LIBS)
+	$(LD) -o $@ $^ $(LD_FLAGS) $(LD_LIBS)
 	@echo "Link finished\n"
 
 $(OBJS) : $(OBJ_DIR)/%.o:%.$(TYPE)
@@ -78,5 +81,6 @@ clean : cleanobj
 	rm -f $(TARGET)
 cleanobj :
 	@echo "Remove object files"
-	# rm -rf $(OBJ_DIR)/*.o
-	rm -rf build/*
+	rm -rf $(OBJ_DIR)/*.o
+	rm $(TARGET)
+	# rm -rf build/*

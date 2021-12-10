@@ -1,0 +1,331 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 4.2.1
+# Built for arm-unknown-linux-gnueabihf
+# Copyright (C) 1988-2016 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Thu Dec  9 15:15:18 2021
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# default
+.SHELLFLAGS := -c
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AGENT_FOLDER = /home/pi/.vscode-server
+# makefile (from 'Makefile', line 17)
+SRC_SUBDIR = .
+# makefile (from 'Makefile', line 28)
+LD_FLAGS := -lpthread `pkg-config --cflags --libs opencv`
+# environment
+XDG_SESSION_TYPE = tty
+# environment
+VSCODE_LOG_NATIVE = false
+# makefile (from 'Makefile', line 13)
+TARGET = dma
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# makefile (from 'Makefile', line 20)
+INCLUDES = -I/usr/include/ -I/usr/include/python3.7m -I/usr/local/include/
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# automatic
+@F = $(notdir $@)
+# default
+MAKE_VERSION := 4.2.1
+# makefile
+CURDIR := /home/pi/server/v4l2
+# makefile
+SHELL = /bin/sh
+# environment
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{}}
+# environment
+_ = /home/pi/.vscode-server/bin/3866c3553be8b268c8a7f8c0482c0c0177aa8bfa/node
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# 'override' directive
+GNUMAKEFLAGS := 
+# makefile (from 'Makefile', line 18)
+OBJ_DIR = build
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# makefile (from 'Makefile', line 50)
+OBJS = ${foreach src, $(notdir $(SRCS)), ${patsubst %.$(TYPE), $(OBJ_DIR)/%.o, $(src)}}
+# environment
+VSCODE_CWD = /home/pi
+# environment
+SSH_CONNECTION = 192.168.3.2 53644 192.168.3.6 22
+# environment
+PATH = /home/pi/.vscode-server/bin/3866c3553be8b268c8a7f8c0482c0c0177aa8bfa/bin:/home/pi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+# makefile (from 'Makefile', line 27)
+LD = $(CC)
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+TEXTDOMAIN = Linux-PAM
+# environment
+VSCODE_LOG_STACK = false
+# environment
+VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-6924c5f2-1af2-40a6-8cb2-b4d18b34abc4.sock
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
+# environment
+LS_COLORS = 
+# automatic
+%F = $(notdir $%)
+# environment
+DISPLAY = :0.0
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+PWD = /home/pi/server/v4l2
+# default
+.LOADED := 
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/server/remoteExtensionHostProcess
+# environment
+HOME = /home/pi
+# environment
+LOGNAME = pi
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+# automatic
++F = $(notdir $+)
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# makefile (from 'Makefile', line 48)
+SRCS = $(filter-out $(EXCLUDE_SRCS),$(INCLUDE_SRCS))
+# environment
+SHLVL = 0
+# makefile (from 'Makefile', line 25)
+CC = g++
+# environment
+XDG_SESSION_ID = 6
+# environment
+USER = pi
+# makefile
+.DEFAULT_GOAL := all
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# makefile (from 'Makefile', line 32)
+TYPE = cpp
+# default
+MAKE_COMMAND := make
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+LANGUAGE = zh_CN.UTF-8
+# makefile
+MAKEFLAGS = pqrR
+# environment
+MFLAGS = -pqrR
+# environment
+SSH_CLIENT = 192.168.3.2 53644 22
+# environment
+MAIL = /var/mail/pi
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# makefile (from 'Makefile', line 29)
+INCLUDE_SRCS := dma.cpp v4l2.cpp
+# environment
+BROWSER = /home/pi/.vscode-server/bin/3866c3553be8b268c8a7f8c0482c0c0177aa8bfa/bin/helpers/browser.sh
+# environment
+NO_AT_BRIDGE = 1
+# default
+MAKEFILES := 
+# makefile (from 'Makefile', line 16)
+SRC_DIR = .
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 26)
+C_FLAGS = -g -O0 -Wall
+# environment
+LC_ALL = C
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# environment
+VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH = /home/pi/.vscode-server/bin/3866c3553be8b268c8a7f8c0482c0c0177aa8bfa/remote/node_modules
+# default
+.RECIPEPREFIX := 
+# default
+MAKE_HOST := arm-unknown-linux-gnueabihf
+# environment
+LANG = C
+# environment
+VSCODE_EXTHOST_WILL_SEND_SOCKET = true
+# variable set hash-table stats:
+# Load=84/1024=8%, Rehash=0, Collisions=13/149=9%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 42, inode -694253924): 27 files, no impossibilities.
+
+# 27 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+all: dma
+#  Command line target.
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/7=0%
+#  recipe to execute (from 'Makefile', line 60):
+	@echo "Builded target:" $^
+	@echo "Done"
+
+cleanobj:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 82):
+	@echo "Remove object files"
+	# rm -rf $(OBJ_DIR)/*.o
+	rm -rf build/*
+
+.PHONY: clean cleanobj
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-09 13:01:05.2103648
+#  File has been updated.
+#  Successfully updated.
+
+build/dma.o: dma.cpp
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: 'dma'
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := build/dma.o
+# automatic
+# % := 
+# automatic
+# * := dma
+# automatic
+# + := dma.cpp
+# automatic
+# | := 
+# automatic
+# < := dma.cpp
+# automatic
+# ^ := dma.cpp
+# automatic
+# ? := dma.cpp
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=1/20=5%
+#  recipe to execute (from 'Makefile', line 70):
+	@mkdir -p $(@D)
+	@echo "Compiling" $@ "from" $< "..."
+	$(CC) -c -o $@ $< $(C_FLAGS) $(INCLUDES)
+
+dma: build/dma.o build/v4l2.o
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/7=0%
+#  recipe to execute (from 'Makefile', line 64):
+	@mkdir -p $(@D)
+	@echo "Linking" $@ "from" $^ "..."
+	$(LD) -o exec/$@ $^ $(LD_FLAGS) $(LD_LIBS)
+	@echo "Link finished\n"
+
+build/v4l2.o: v4l2.cpp
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: 'v4l2'
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 70):
+	@mkdir -p $(@D)
+	@echo "Compiling" $@ "from" $< "..."
+	$(CC) -c -o $@ $< $(C_FLAGS) $(INCLUDES)
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+clean: cleanobj
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 79):
+	@echo "Remove all executable files"
+	rm -f $(TARGET)
+
+# Not a target:
+dma.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-09 13:00:53.1281844
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+ 
+v4l2.cpp:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=12/1024=1%, Rehash=0, Collisions=0/36=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 41 / storage = 375 B / avg = 9 B
+# current buf: size = 8174 B / used = 375 B / count = 41 / avg = 9 B
+
+# strcache performance: lookups = 62 / hit rate = 33%
+# hash-table stats:
+# Load=41/8192=1%, Rehash=0, Collisions=1/62=2%
+# Finished Make data base on Thu Dec  9 15:15:18 2021
+
+ 
