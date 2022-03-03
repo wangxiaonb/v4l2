@@ -1,6 +1,6 @@
 ##################################################################
 # TARGET = ${notdir $(CURDIR)}
-# TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
+TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
 # TARGET = v4l2_test
 # TARGET = v4l2_grab
 # TARGET = flash_led
@@ -9,7 +9,7 @@
 # TARGET = uvc2
 # TARGET = uvc3
 # TARGET = render
-TARGET = mmal
+# TARGET = mmal
 # TARGET = dma
 
 
@@ -54,6 +54,7 @@ vpath %.$(TYPE) $(sort $(dir $(SRCS)))
 ifneq ($(TARGET),$(subst .cpython-37m-arm-linux-gnueabihf.so,,$(TARGET)))
 all:
 	python3 setup.py build_ext --inplace
+	cp $(TARGET) ../mmal/python
 	mv $(TARGET) python
 else
 all : $(TARGET)

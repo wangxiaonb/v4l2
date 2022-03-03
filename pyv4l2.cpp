@@ -42,7 +42,7 @@ PyObject *py_open(PyObject *self, PyObject *args)
     void *handle = open(dev);
     unsigned long result = (unsigned long)handle;
     // printf("py_open %lu\n", result);
-    return PyLong_FromUnsignedLong(result);
+    return PyLong_FromLong(result);
 }
 
 PyObject *py_open2(PyObject *self, PyObject *args)
@@ -54,10 +54,10 @@ PyObject *py_open2(PyObject *self, PyObject *args)
     PyArg_ParseTuple(args, "siis", &dev, &width, &height, &color);
     printf("camera dev: %s\n", dev);
     printf("%d x %d, %s\n", width, height, color);
-    void *handle = open(dev, width, height, color);
-    unsigned long result = (unsigned long)handle;
+    long result  = (long)open(dev, width, height, color);
+    
     // printf("py_open %lu\n", result);
-    return PyLong_FromUnsignedLong(result);
+    return PyLong_FromLong(result);
 }
 
 PyObject *py_close(PyObject *self, PyObject *args)
