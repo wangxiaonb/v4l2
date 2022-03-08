@@ -1,7 +1,7 @@
 ##################################################################
 # TARGET = ${notdir $(CURDIR)}
-TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
-# TARGET = v4l2_test
+# TARGET = v4l2.cpython-37m-arm-linux-gnueabihf.so
+TARGET = v4l2_test
 # TARGET = v4l2_grab
 # TARGET = flash_led
 # TARGET = brenner
@@ -23,10 +23,11 @@ INCLUDES = \
 -I/usr/include/python3.7m \
 -I/usr/local/include/
 
+
 CC = g++
 C_FLAGS = -g -O0 -Wall
 LD = $(CC)
-LD_FLAGS := -lpthread `pkg-config --cflags --libs opencv`
+LD_FLAGS := -lpthread `pkg-config --cflags --libs opencv4`
 INCLUDE_SRCS := $(TARGET).cpp v4l2.cpp
 
 ifeq ($(CC), g++)
