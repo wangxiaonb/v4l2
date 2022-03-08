@@ -3,13 +3,11 @@
         {
             "name": "Linux",
             "includePath": [
-                "/usr/include/python3.7m/*",
-                "/opt/vc/include/*",
-                "/opt/vc/include/interface/mmal/*",
+                "/usr/include/python3.9m/*",
                 "${workspaceFolder}/*"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/arm-linux-gnueabihf-g++",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-arm"

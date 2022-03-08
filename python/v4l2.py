@@ -3,10 +3,7 @@ import numpy as np
 import cv2
 import sys
 import time
-import os
-import threading
-
-import RPi.GPIO as GPIO
+import argparse
 
 # os.system('v4l2-ctl --set-fmt-video=width=640,height=480,pixelformat=GREY')
 
@@ -28,115 +25,64 @@ analogue_gain =0x009e0903 #(int) : min=16 max=248 step=1 default=16 value=16
 link_frequency= 0x009f0901 #(intmenu): min=0 max=0 default=0 value=0 flags=read-only
 pixel_rate= 0x009f0902 #(int64)  : min=200000000 max=200000000 step=1 default=200000000 value=2000000
 
-def thread_show():
-    global g_image
-    global image
-    global semaphore
-    while True:
-        semaphore.acquire()
-
-        # lock.acquire()
-        # image_show = g_image
-        # lock.release()
-
-        cv2.imshow('image', g_image)
-
-        key = cv2.waitKey(1)
-        if key == ord('q'):
-            sys.exit()
-
-
-def main():
-    global image
-    global g_image
-    global semaphore
-
-    t1 = threading.Thread(target=thread_show)
-
-    # camera = v4l2.open('/dev/video0')
-    camera = v4l2.open2('/dev/video0', width, height, 'GREY')
-    v4l2.start(camera)
-    # v4l2.setformat(camera,width,height,'GREY')
-
-    v4l2.setcontrol(camera, exposure, 2900)
-    value = v4l2.getcontrol(camera, exposure)
-
-    # v4l2.setcontrol(camera, V4L2_CID_HBLANK, 800)
-    # value = v4l2.getcontrol(camera,V4L2_CID_HBLANK)
-
-    # value = v4l2.getcontrol(camera, vertical_blanking)
-    v4l2.setcontrol(camera, vertical_blanking, 3500)
-    # value = v4l2.getcontrol(camera, vertical_blanking)
-
-    t1.start()
-
-    frame_count = 0
-
-    fps_count = 0
-    fps = 0
-    ts = time.time()
-
-    # while frame_count < 1000:
-    while True:
-        GPIO.output(17, False)
-        GPIO.output(18, False)
-
-        data = v4l2.read(camera)
-
-        GPIO.output(17, True)
-        GPIO.output(18, True)
-
-        # time.sleep(0.005)
-
-        fps_count += 1
-        if fps_count >= 120:
-            t = time.time() - ts
-            fps = int(round(fps_count / t, 0))
-            print("fps:%d   frame length:%d" % (fps, len(data)))
-            fps_count = 0
-            ts = time.time()
-
-        frame_count += 1
-        if frame_count >= 1:
-            frame_count = 0
-
-            image_array = np.frombuffer(data, dtype=np.uint8)
-            image = image_array.reshape(height, width)
-
-            # image = cv2.resize(image, (768, 480))
-
-            # image = cv2.flip(image, 0)
-
-            image = cv2.putText(image, 'FPS:'+str(fps), (10, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (127, 127, 127), 1)
-
-            # lock.acquire()
-            # g_image = image
-            # lock.release()
-            # semaphore.release()
-
-        cv2.imshow('image', image)
-        key = cv2.waitKey(1)
-        if key == ord('q'):
-            sys.exit()
-
-    v4l2.stop(camera)
-    v4l2.close(camera)
-
-
-
-gpio_state = True
-GPIO.setmode(GPIO.BCM) 
-GPIO.setup(17, GPIO.OUT)
-GPIO.setup(18, GPIO.OUT)
-
+##########################################################################
 width, height = 1280, 800
 # width, height = 1280, 720
 # width, height = 640, 480
 # width, height = 640, 400
-g_image = np.zeros((height, width), dtype=np.uint8)
-lock = threading.Lock()
-semaphore = threading.Semaphore(0)
 
-if __name__ == '__main__':
-    main()
+##############################################################################
+parser = argparse.ArgumentParser(description='camera display')
+parser.add_argument('-n', '--number', type=str,
+                    default='0', help='camera number')
+args = parser.parse_args()
+
+camera_num = args.number
+
+# camera = v4l2.open('/dev/video0')
+camera = v4l2.open2('/dev/video'+camera_num, width, height, 'GREY')
+v4l2.start(camera)
+# v4l2.setformat(camera,width,height,'GREY')
+
+v4l2.setcontrol(camera, exposure, 2900)
+value = v4l2.getcontrol(camera, exposure)
+
+# v4l2.setcontrol(camera, V4L2_CID_HBLANK, 800)
+# value = v4l2.getcontrol(camera,V4L2_CID_HBLANK)
+
+# value = v4l2.getcontrol(camera, vertical_blanking)
+v4l2.setcontrol(camera, vertical_blanking, 500)
+# value = v4l2.getcontrol(camera, vertical_blanking)
+
+fps_count = 0
+fps = 0
+ts = time.time()
+
+while True:
+    data = v4l2.read(camera)
+
+    fps_count += 1
+    if fps_count >= 120:
+        t = time.time() - ts
+        fps = int(round(fps_count / t, 0))
+        print("fps:%d   frame length:%d" % (fps, len(data)))
+        fps_count = 0
+        ts = time.time()
+
+
+    image_array = np.frombuffer(data, dtype=np.uint8)
+    image = image_array.reshape(height, width)
+
+    # image = cv2.resize(image, (768, 480))
+    # image = cv2.flip(image, 0)
+
+    image = cv2.putText(image, 'FPS:'+str(fps), (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (127, 127, 127), 1)
+
+    cv2.imshow('camera'+camera_num, image)
+    key = cv2.waitKey(1)
+    if key == ord('q'):
+        break
+
+v4l2.stop(camera)
+v4l2.close(camera)

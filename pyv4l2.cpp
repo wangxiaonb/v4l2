@@ -2,13 +2,6 @@
 #include <Python.h>
 #include "v4l2.hpp"
 
-typedef struct
-{
-    PyObject_HEAD;
-    void *start;
-    size_t length;
-} PyFrameObject;
-
 char b[] = {1, 2, 3, 4, 5, 5, 4, 3, 2, 1};
 
 PyObject *py_test(PyObject *self, PyObject *args)

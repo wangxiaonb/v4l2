@@ -19,6 +19,7 @@ OBJ_DIR = build
 
 INCLUDES = \
 -I/usr/include/ \
+-I/usr/include/opencv4 \
 -I/usr/include/python3.7m \
 -I/usr/local/include/
 
@@ -54,8 +55,8 @@ vpath %.$(TYPE) $(sort $(dir $(SRCS)))
 ifneq ($(TARGET),$(subst .cpython-37m-arm-linux-gnueabihf.so,,$(TARGET)))
 all:
 	python3 setup.py build_ext --inplace
-	cp $(TARGET) ../mmal/python
-	mv $(TARGET) python
+	mv v4l2.*.so python
+
 else
 all : $(TARGET)
 	@echo "Builded target:" $^

@@ -15,7 +15,7 @@ setup(name=module_name,
           module_name,  # 注意这个地方要和模块初始化的函数名对应
           sources=["pyv4l2.cpp", "v4l2.cpp"],
           # extra_link_args=ela
-          #   include_dirs=["头文件目录，这里填当前目录即可"],
+        include_dirs=["/usr/include/opencv4"],
           # libraries=['pthread'],
           # extra_objects = ['`pkg-config --cflags --libs opencv`'],
           # library_dirs = ['/usr/local/include/opencv2/contrib','/usr/local/include/opencv2/core','/usr/local/include/opencv2/highgui','/usr/local/include/opencv2/imgproc','/usr/local/include'],
